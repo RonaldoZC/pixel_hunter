@@ -22,10 +22,10 @@ public class WsCurrencyController {
     public ResponseEntity<CurrencyResponse> getCurrency(
             @RequestParam String source,
             @RequestParam String target,
-            @RequestHeader("X-User-Type") Integer userType) throws Exception {
+            @RequestHeader("X-User-Type") String userType) throws Exception {
 
-        // Regra de autorização: Admin (0) ou Comum (1)
-        if (userType == null || (userType != 0 && userType != 1)) {
+        // Regra de autorização: o gateway envia o perfil do JWT (BUYER ou SELLER)
+        if (!"BUYER".equals(userType) && !"SELLER".equals(userType)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Usuário sem permissão");
         }
 

@@ -55,6 +55,11 @@ Consumo de memória: a pilha de observabilidade soma ~1,3 GB (limites de memóri
 - As chaves do R2 e o segredo JWT que estavam no código antigo foram expostos: **gere novas** no painel da Cloudflare e troque o JWT antes de publicar o repositório.
 - Perfis (`SELLER`/`BUYER`) são validados nos serviços, não só no gateway.
 
+## Documentação
+
+- [Arquitetura e decisões](docs/ARQUITETURA.md) (inclui o diagrama)
+- [Endpoints com cURL](docs/ENDPOINTS.md)
+
 ## Contrato
 
 Ver `docs/api-contract.md` no repositório do front-end.
