@@ -1,0 +1,10 @@
+apiVersion: 1
+
+providers:
+  - name: pixel-hunter
+    folder: Pixel Hunter
+    type: file
+    disableDeletion: true
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/dashboards

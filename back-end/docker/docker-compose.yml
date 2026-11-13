@@ -27,6 +27,8 @@ services:
       - ./config/load-config.sh:/scripts/load-config.sh:ro
     environment:
       CONSUL_HTTP_ADDR: http://consul:8500
+      DB_USER: ${DB_USER:?defina DB_USER no arquivo .env}
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no arquivo .env}
     depends_on:
       consul:
         condition: service_healthy
@@ -42,12 +44,12 @@ services:
     container_name: product-db
     environment:
       POSTGRES_DB: db_product
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USER:?defina DB_USER no arquivo .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no arquivo .env}
     volumes:
       - product_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db_product"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_product"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -62,12 +64,12 @@ services:
     container_name: currency-db
     environment:
       POSTGRES_DB: db_currency
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USER:?defina DB_USER no arquivo .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no arquivo .env}
     volumes:
       - currency_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db_currency"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_currency"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -82,12 +84,12 @@ services:
     container_name: auth-db
     environment:
       POSTGRES_DB: db_user
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USER:?defina DB_USER no arquivo .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no arquivo .env}
     volumes:
       - auth_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db_user"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_user"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -102,12 +104,12 @@ services:
     container_name: orders-db
     environment:
       POSTGRES_DB: db_orders
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USER:?defina DB_USER no arquivo .env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no arquivo .env}
     volumes:
       - orders_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d db_orders"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d db_orders"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -243,6 +245,93 @@ services:
     networks:
       - backend
 
+  # ============================================
+  # OBSERVABILIDADE - TRACING (Zipkin)
+  # ============================================
+  zipkin:
+    image: openzipkin/zipkin:3
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+    environment:
+      JAVA_OPTS: "-Xms64m -Xmx256m"
+    mem_limit: 384m
+    networks:
+      - backend
+
+  # ============================================
+  # OBSERVABILIDADE - METRICAS (Prometheus)
+  # ============================================
+  prometheus:
+    image: prom/prometheus:v3.2.1
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=2d
+    volumes:
+      - ./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    mem_limit: 256m
+    networks:
+      - backend
+
+  # ============================================
+  # OBSERVABILIDADE - LOGS (Loki + Promtail)
+  # ============================================
+  loki:
+    image: grafana/loki:3.4.2
+    container_name: loki
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./observability/loki/loki-config.yml:/etc/loki/loki-config.yml:ro
+      - loki_data:/loki
+    mem_limit: 256m
+    networks:
+      - backend
+
+  promtail:
+    image: grafana/promtail:3.4.2
+    container_name: promtail
+    command: -config.file=/etc/promtail/promtail-config.yml
+    volumes:
+      - ./observability/promtail/promtail-config.yml:/etc/promtail/promtail-config.yml:ro
+      # Acesso ao Docker para descobrir os containers e ler seus logs
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - loki
+    mem_limit: 128m
+    networks:
+      - backend
+
+  # ============================================
+  # OBSERVABILIDADE - VISUALIZACAO (Grafana)
+  # ============================================
+  grafana:
+    image: grafana/grafana:11.5.2
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?defina GRAFANA_ADMIN_PASSWORD no arquivo .env}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /etc/grafana/dashboards/pixel-hunter.json
+    volumes:
+      - ./observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./observability/grafana/dashboards:/etc/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+      - loki
+      - zipkin
+    mem_limit: 256m
+    networks:
+      - backend
+
 # ============================================
 # REDE E VOLUMES
 # ============================================
@@ -255,3 +344,6 @@ volumes:
   currency_data:
   auth_data:
   orders_data:
+  prometheus_data:
+  loki_data:
+  grafana_data:
