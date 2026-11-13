@@ -1,0 +1,257 @@
+services:
+  # ============================================
+  # CONSUL
+  # ============================================
+  consul:
+    image: hashicorp/consul:1.21
+    container_name: consul
+    ports:
+      - "8500:8500"
+    command: agent -dev -client=0.0.0.0 -ui
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "consul", "members"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ============================================
+  # CARREGAMENTO DAS CONFIGURACOES
+  # ============================================
+  consul-config:
+    image: hashicorp/consul:1.21
+    container_name: consul-config
+    entrypoint: ["/bin/sh", "/scripts/load-config.sh"]
+    volumes:
+      - ./config/load-config.sh:/scripts/load-config.sh:ro
+    environment:
+      CONSUL_HTTP_ADDR: http://consul:8500
+    depends_on:
+      consul:
+        condition: service_healthy
+    restart: "no"
+    networks:
+      - backend
+
+  # ============================================
+  # BANCO DE DADOS - PRODUCT API
+  # ============================================
+  product-db:
+    image: postgres:17
+    container_name: product-db
+    environment:
+      POSTGRES_DB: db_product
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - product_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_product"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+  # ============================================
+  # BANCO DE DADOS - CURRENCY API
+  # ============================================
+  currency-db:
+    image: postgres:17
+    container_name: currency-db
+    environment:
+      POSTGRES_DB: db_currency
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - currency_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_currency"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+  # ============================================
+  # BANCO DE DADOS - AUTH API
+  # ============================================
+  auth-db:
+    image: postgres:17
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: db_user
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_user"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+  # ============================================
+  # BANCO DE DADOS - ORDERS API
+  # ============================================
+  orders-db:
+    image: postgres:17
+    container_name: orders-db
+    environment:
+      POSTGRES_DB: db_orders
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - orders_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_orders"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - backend
+
+  # ============================================
+  # PRODUCT API
+  # ============================================
+  product-api:
+    build:
+      context: ../product-api
+    container_name: product-api
+    ports:
+      - "8000:8000"
+    environment:
+      SPRING_CONFIG_IMPORT: "consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: "8500"
+    depends_on:
+      consul-config:
+        condition: service_completed_successfully
+      product-db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  # ============================================
+  # CURRENCY API
+  # ============================================
+  currency-api:
+    build:
+      context: ../currency-api
+    container_name: currency-api
+    ports:
+      - "8100:8100"
+    environment:
+      SPRING_CONFIG_IMPORT: "consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: "8500"
+    depends_on:
+      consul-config:
+        condition: service_completed_successfully
+      currency-db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  # ============================================
+  # AUTH API
+  # ============================================
+  auth-api:
+    build:
+      context: ../auth-api
+    container_name: auth-api
+    ports:
+      - "8200:8200"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no arquivo .env}
+      SPRING_CONFIG_IMPORT: "consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: "8500"
+    depends_on:
+      consul-config:
+        condition: service_completed_successfully
+      auth-db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  # ============================================
+  # MEDIA API (upload de imagens para o Cloudflare R2)
+  # ============================================
+  media-api:
+    build:
+      context: ../media-api
+    container_name: media-api
+    ports:
+      - "8300:8300"
+    environment:
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: "8500"
+      R2_ENDPOINT: ${R2_ENDPOINT:?defina R2_ENDPOINT no arquivo .env}
+      R2_ACCESS_KEY: ${R2_ACCESS_KEY:?defina R2_ACCESS_KEY no arquivo .env}
+      R2_SECRET_KEY: ${R2_SECRET_KEY:?defina R2_SECRET_KEY no arquivo .env}
+      R2_BUCKET: ${R2_BUCKET:?defina R2_BUCKET no arquivo .env}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL:?defina R2_PUBLIC_URL no arquivo .env}
+    depends_on:
+      consul-config:
+        condition: service_completed_successfully
+    networks:
+      - backend
+
+  # ============================================
+  # ORDERS API
+  # ============================================
+  orders-api:
+    build:
+      context: ../orders-api
+    container_name: orders-api
+    ports:
+      - "8400:8400"
+    environment:
+      SPRING_CONFIG_IMPORT: "optional:consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: "8500"
+    depends_on:
+      consul-config:
+        condition: service_completed_successfully
+      orders-db:
+        condition: service_healthy
+    networks:
+      - backend
+
+  # ============================================
+  # GATEWAY API
+  # ============================================
+  gateway-api:
+    build:
+      context: ../gateway-api
+    container_name: gateway-api
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:?defina JWT_SECRET no arquivo .env}
+      SPRING_CONFIG_IMPORT: "consul:"
+      SPRING_CLOUD_CONSUL_HOST: consul
+      SPRING_CLOUD_CONSUL_PORT: "8500"
+    depends_on:
+      consul-config:
+        condition: service_completed_successfully
+    networks:
+      - backend
+
+# ============================================
+# REDE E VOLUMES
+# ============================================
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  product_data:
+  currency_data:
+  auth_data:
+  orders_data:
