@@ -63,3 +63,54 @@ O app abre no navegador. Se aparecer "Não foi possível conectar", confira o `.
 | Zipkin | http://localhost:9411 |
 | Prometheus | http://localhost:9090 |
 | Grafana (admin/admin) | http://localhost:3000 |
+
+---
+
+# PC com pouca memória RAM: usar Ubuntu (WSL) sem Docker Desktop
+
+O Docker Desktop usa bastante RAM só para a interface. Dá para rodar o Docker **direto dentro do Ubuntu no Windows**, sem janela gráfica. O resto do projeto é igual.
+
+## 1. Instalar o Ubuntu (uma vez)
+No **PowerShell como administrador**:
+```
+wsl --install -d Ubuntu
+```
+Reinicie o PC se pedir, abra o app "Ubuntu" e crie usuário e senha.
+
+## 2. Limitar a memória do WSL
+Crie o arquivo `C:\Users\SEU_USUARIO\.wslconfig`:
+```
+[wsl2]
+memory=4GB
+processors=2
+swap=4GB
+```
+Depois, no PowerShell: `wsl --shutdown`. (Se o PC tem 8 GB, use 4GB. Se tem 4 GB, use 2GB e rode a versão leve abaixo.)
+
+## 3. Instalar o Docker dentro do Ubuntu (uma vez)
+No terminal do Ubuntu:
+```
+curl -fsSL https://get.docker.com | sudo sh
+sudo usermod -aG docker $USER
+```
+Feche e abra o Ubuntu de novo. Teste com `docker run hello-world`.
+(Se o Docker Desktop estiver instalado, feche-o e desative a integração com WSL.)
+
+## 4. Rodar o back-end no Ubuntu
+Copie o projeto para dentro do Ubuntu (muito mais rápido que rodar em `/mnt/c`). No Ubuntu:
+```
+cp -r /mnt/c/CAMINHO/pixel_hunter ~/pixel_hunter
+cd ~/pixel_hunter/back-end/docker
+cp .env.example .env
+COMPOSE_PARALLEL_LIMIT=1 docker compose up --build
+```
+O `localhost:8080` do Windows já acessa o que roda no WSL. O front pode continuar rodando no Windows como no passo 2.
+
+## 5. Versão leve (economiza uns 1,3 GB)
+Sobe só o necessário, sem Grafana, Prometheus, Loki e Zipkin:
+```
+COMPOSE_PARALLEL_LIMIT=1 docker compose up --build gateway-api auth-api product-api orders-api currency-api media-api
+```
+Na demonstração para o professor (requisito de observabilidade), suba tudo com `docker compose up -d`.
+
+Dica: feche o navegador e outros programas pesados enquanto compila. A primeira build é a que mais usa memória.
