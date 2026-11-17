@@ -129,3 +129,6 @@ Dentro das rotas protegidas, os serviços ainda verificam o perfil: só `SELLER`
 5. **Promtail.** Lê os logs dos containers pelo `docker.sock` (somente leitura). É aceitável para desenvolvimento e demonstração, mas não para produção.
 6. **Actuator.** Só `health`, `info`, `metrics` e `prometheus` ficam expostos, para não revelar `env`, `beans` nem `heapdump`.
 7. **CORS.** Liberado só no gateway, para o app rodar também no navegador.
+
+## Documentação da API
+Swagger UI (springdoc-openapi) agregado no gateway em `/swagger-ui.html`; o gateway expõe o `/v3/api-docs` de cada serviço em `/docs/<servico>/v3/api-docs`.

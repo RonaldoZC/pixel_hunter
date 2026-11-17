@@ -127,3 +127,12 @@ curl "http://localhost:8080/ws/currencies?source=USD&target=BRL" -H "Authorizati
 | Prometheus | http://localhost:9090 |
 | Zipkin (rastreamento) | http://localhost:9411 |
 | Consul (registro e configuração) | http://localhost:8500 |
+
+## Swagger (OpenAPI)
+
+Com a stack no ar, a documentação interativa de todos os serviços fica em um só lugar:
+
+- **http://localhost:8080/swagger-ui.html** (via gateway; escolha o serviço no seletor do topo)
+- Cada serviço também tem a sua: `http://localhost:<porta>/swagger-ui.html` (JSON em `/v3/api-docs`).
+
+Para testar rotas `/ws/**`: faça `POST /auth/signin` no Swagger, copie o `token`, clique em **Authorize** e cole o JWT.
