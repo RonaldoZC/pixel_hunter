@@ -6,5 +6,5 @@ import java.math.BigDecimal;
 
 /** Os campos do produto que o pedido precisa. */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record ProductSnapshot(Long id, String title, BigDecimal price) {
+public record ProductSnapshot(Long id, String title, BigDecimal price, Long sellerId) {
 }

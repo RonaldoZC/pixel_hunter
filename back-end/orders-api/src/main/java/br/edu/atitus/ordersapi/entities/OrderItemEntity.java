@@ -26,6 +26,10 @@ public class OrderItemEntity {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
+    /** Dono do produto quando foi vendido; nulo em itens anteriores ao histórico de vendas. */
+    @Column(name = "seller_id")
+    private Long sellerId;
+
     public Long getId() {
         return id;
     }
@@ -60,5 +64,13 @@ public class OrderItemEntity {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public Long getSellerId() {
+        return sellerId;
+    }
+
+    public void setSellerId(Long sellerId) {
+        this.sellerId = sellerId;
     }
 }

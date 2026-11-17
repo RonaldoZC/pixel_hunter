@@ -25,8 +25,8 @@ class OrderServiceTest {
     private OrderService service;
 
     private final Map<Long, ProductSnapshot> products = Map.of(
-            1L, new ProductSnapshot(1L, "Troll Mutante", new BigDecimal("19.90")),
-            2L, new ProductSnapshot(2L, "Castelo Modular", new BigDecimal("39.90")));
+            1L, new ProductSnapshot(1L, "Troll Mutante", new BigDecimal("19.90"), 7L),
+            2L, new ProductSnapshot(2L, "Castelo Modular", new BigDecimal("39.90"), 7L));
 
     private final ProductCatalog catalog = id -> {
         var p = products.get(id);
@@ -51,7 +51,7 @@ class OrderServiceTest {
 
     @Test
     void totalIsSumOfServerPrices() {
-        assertEquals(new BigDecimal("59.80"), OrderService.total(List.of(new BigDecimal("19.90"), new BigDecimal("39.90"))));
+        assertEquals(new BigDecimal("59.80"), OrderService.total(List.of(new BigDecimal("19.90"), new BigDecimal("39.90"), 7L)));
         assertEquals(new BigDecimal("0.30"), OrderService.total(List.of(new BigDecimal("0.10"), new BigDecimal("0.20"))));
     }
 

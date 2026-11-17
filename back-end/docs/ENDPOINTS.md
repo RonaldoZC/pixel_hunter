@@ -78,7 +78,7 @@ curl -X DELETE http://localhost:8080/ws/products/73 -H "Authorization: Bearer $T
 curl -X POST http://localhost:8080/ws/media -H "Authorization: Bearer $TOKEN" -F "file=@imagem.png"
 ```
 
-## orders-api
+## orders-api (pedidos e vendas)
 
 | Método | Caminho | Acesso | Finalidade |
 |---|---|---|---|
@@ -95,6 +95,16 @@ curl "http://localhost:8080/ws/orders?page=0&size=50" -H "Authorization: Bearer 
 
 # GET /ws/orders/{id}
 curl http://localhost:8080/ws/orders/1 -H "Authorization: Bearer $TOKEN"
+```
+
+### Vendas (vendedor)
+
+| Método | Caminho | Acesso | Finalidade |
+|---|---|---|---|
+| GET | `/ws/sales` | `SELLER` | Histórico de vendas do vendedor logado, paginado (mais recentes primeiro) |
+
+```bash
+curl "http://localhost:8080/ws/sales?page=0&size=50" -H "Authorization: Bearer $TOKEN"
 ```
 
 ## currency-api

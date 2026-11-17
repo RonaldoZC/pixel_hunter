@@ -4,6 +4,9 @@ Back-end em **microsserviços** (Java 21, Spring Boot, Spring Cloud). O aplicati
 
 ## Diagrama geral
 
+![Arquitetura do Pixel Hunter](arquitetura.png)
+
+
 ```mermaid
 flowchart LR
     APP["App React Native<br/>(front-end)"] -->|HTTP :8080| GW
@@ -78,7 +81,7 @@ flowchart LR
 | gateway-api | 8080 | Único ponto de entrada. Roteia por nome de serviço (`lb://`), valida o JWT nas rotas `/ws/**`, repassa a identidade em `X-User-Id`, `X-User-Type` e `X-User-Email` e responde o CORS | — |
 | auth-api | 8200 | Cadastro, login (gera o JWT), perfil e foto do usuário. Perfis `BUYER` e `SELLER` | `db_user` |
 | product-api | 8000 | Catálogo: produtos, categorias, busca e produtos do vendedor | `db_product` |
-| orders-api | 8400 | Pedidos do comprador. Consulta título e preço no product-api | `db_orders` |
+| orders-api | 8400 | Pedidos do comprador e histórico de vendas do vendedor. Consulta título, preço e vendedor no product-api | `db_orders` |
 | media-api | 8300 | Recebe imagens (PNG/JPG/WebP até 5 MB) e as envia ao Cloudflare R2 | — |
 | currency-api | 8100 | Cotações de moeda (API do Banco Central) com Retry e Circuit Breaker | `db_currency` |
 

@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 public record CurrentUser(Long id, String type) {
 
     public static final String BUYER = "BUYER";
+    public static final String SELLER = "SELLER";
 
     public static CurrentUser from(String idHeader, String typeHeader) {
         if (idHeader == null || idHeader.isBlank() || typeHeader == null || typeHeader.isBlank()) {

@@ -49,8 +49,6 @@ assets/images/        imagens fornecidas pelo grupo (mapa de fundo)
 docs/api-contract.md  endpoints da API usados pelo app
 ```
 
-Regras do projeto estão em [CLAUDE.md](CLAUDE.md) (e [AGENTS.md](AGENTS.md)).
-
 ## Telas e estado atual
 
 | Tela | Estado |
@@ -63,7 +61,9 @@ Regras do projeto estão em [CLAUDE.md](CLAUDE.md) (e [AGENTS.md](AGENTS.md)).
 | Carrinho | Local (em memória). **Finalizar compra** cria o pedido na API (só conta Comprador logada). |
 | Configurações | Mostra só o que o perfil pode usar: Meus Dados (logado), Meus Pedidos (Comprador), Cadastrar Produto (Vendedor), Sair/Entrar. |
 | Meus Dados | Carrega e salva nome, e-mail e link; a foto escolhida é enviada e gravada no perfil. |
-| Meus Pedidos | Histórico real do comprador. |
+| Meus Pedidos | Histórico real do comprador; tocar em um pedido abre o detalhe com os itens. |
+| Meus Produtos | Só Vendedor: lista os próprios produtos, edita (mesma tela do cadastro) e exclui com confirmação. |
+| Histórico de Vendas | Só Vendedor: itens vendidos, com data, pedido e total vendido. |
 | Atendimento ao Cliente | Telefones, status ONLINE/OFFLINE calculado pelo horário de Brasília; **Enviar e-mail desabilitado** até definir o endereço. |
 | Cadastro de Produto | Só Vendedor: imagem, categoria, título, descrição e preço; envia a imagem e publica o produto. |
 

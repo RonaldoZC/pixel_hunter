@@ -31,6 +31,9 @@ export default function SettingsScreen({ navigation }) {
         <Button title="Meus Produtos" variant="outline" onPress={() => navigation.navigate('MyProducts')} />
       ) : null}
       {isSeller ? (
+        <Button title="Histórico de Vendas" variant="outline" onPress={() => navigation.navigate('Sales')} />
+      ) : null}
+      {isSeller ? (
         <Button title="Cadastrar Produto" onPress={() => navigation.navigate('ProductCreate')} />
       ) : null}
       {user ? (

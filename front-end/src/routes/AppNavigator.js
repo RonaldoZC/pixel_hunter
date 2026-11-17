@@ -7,6 +7,7 @@ import HomeScreen from '../pages/HomeScreen';
 import MyDataScreen from '../pages/MyDataScreen';
 import MyProductsScreen from '../pages/MyProductsScreen';
 import OrderDetailScreen from '../pages/OrderDetailScreen';
+import SalesScreen from '../pages/SalesScreen';
 import OrdersScreen from '../pages/OrdersScreen';
 import ProductCreateScreen from '../pages/ProductCreateScreen';
 import RegisterScreen from '../pages/RegisterScreen';
@@ -27,6 +28,7 @@ export default function AppNavigator() {
       <Stack.Screen name="Orders" component={OrdersScreen} options={{ title: 'Meus Pedidos' }} />
       <Stack.Screen name="OrderDetail" component={OrderDetailScreen} options={{ title: 'Pedido' }} />
       <Stack.Screen name="MyProducts" component={MyProductsScreen} options={{ title: 'Meus Produtos' }} />
+      <Stack.Screen name="Sales" component={SalesScreen} options={{ title: 'Histórico de Vendas' }} />
       <Stack.Screen name="Support" component={SupportScreen} options={{ title: 'Atendimento ao Cliente' }} />
       <Stack.Screen
         name="ProductCreate"

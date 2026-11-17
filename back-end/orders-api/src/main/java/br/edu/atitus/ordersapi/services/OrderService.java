@@ -57,6 +57,7 @@ public class OrderService {
             item.setAssetId(product.id());
             item.setTitle(product.title());
             item.setPrice(product.price().setScale(2, RoundingMode.HALF_UP));
+            item.setSellerId(product.sellerId());
             order.addItem(item);
         }
         order.setTotal(total(order.getItems().stream().map(OrderItemEntity::getPrice).toList()));
