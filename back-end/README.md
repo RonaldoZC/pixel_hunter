@@ -15,13 +15,13 @@ Java 21 / Spring Boot, Spring Cloud Gateway, Consul e PostgreSQL. O app mobile e
 
 ```bash
 cd docker
-cp .env.example .env   # preencha JWT_SECRET e as variáveis do R2
+cp .env.example .env   # já vem com valores de demonstração; no Windows: copy .env.example .env
 docker compose up --build
 ```
 
 A API fica em `http://localhost:8080`. No celular use o IP do computador (`EXPO_PUBLIC_API_URL=http://<ip>:8080` no front).
 
-Variáveis do `docker/.env` (todas obrigatórias; o Compose avisa qual está faltando):
+Variáveis do `docker/.env` (o `.env.example` já traz valores de demonstração; `R2_*` é opcional e só afeta o upload de imagens):
 
 | Variável | Para quê |
 |---|---|

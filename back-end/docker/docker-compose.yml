@@ -193,11 +193,11 @@ services:
       SPRING_CONFIG_IMPORT: "optional:consul:"
       SPRING_CLOUD_CONSUL_HOST: consul
       SPRING_CLOUD_CONSUL_PORT: "8500"
-      R2_ENDPOINT: ${R2_ENDPOINT:?defina R2_ENDPOINT no arquivo .env}
-      R2_ACCESS_KEY: ${R2_ACCESS_KEY:?defina R2_ACCESS_KEY no arquivo .env}
-      R2_SECRET_KEY: ${R2_SECRET_KEY:?defina R2_SECRET_KEY no arquivo .env}
-      R2_BUCKET: ${R2_BUCKET:?defina R2_BUCKET no arquivo .env}
-      R2_PUBLIC_URL: ${R2_PUBLIC_URL:?defina R2_PUBLIC_URL no arquivo .env}
+      R2_ENDPOINT: ${R2_ENDPOINT:-https://r2.invalid}
+      R2_ACCESS_KEY: ${R2_ACCESS_KEY:-nao-configurado}
+      R2_SECRET_KEY: ${R2_SECRET_KEY:-nao-configurado}
+      R2_BUCKET: ${R2_BUCKET:-nao-configurado}
+      R2_PUBLIC_URL: ${R2_PUBLIC_URL:-https://r2.invalid}
     depends_on:
       consul-config:
         condition: service_completed_successfully
