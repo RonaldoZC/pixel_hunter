@@ -1,1 +1,9 @@
 .DS_Store
+
+# Segredos e arquivos gerados
+.env
+.env.local
+**/node_modules/
+**/target/
+.expo/
+dist/
