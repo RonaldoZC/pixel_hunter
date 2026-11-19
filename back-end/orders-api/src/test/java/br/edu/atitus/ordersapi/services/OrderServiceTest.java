@@ -51,7 +51,7 @@ class OrderServiceTest {
 
     @Test
     void totalIsSumOfServerPrices() {
-        assertEquals(new BigDecimal("59.80"), OrderService.total(List.of(new BigDecimal("19.90"), new BigDecimal("39.90"), 7L)));
+        assertEquals(new BigDecimal("59.80"), OrderService.total(List.of(new BigDecimal("19.90"), new BigDecimal("39.90"))));
         assertEquals(new BigDecimal("0.30"), OrderService.total(List.of(new BigDecimal("0.10"), new BigDecimal("0.20"))));
     }
 

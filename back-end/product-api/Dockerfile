@@ -18,14 +18,14 @@ RUN chmod +x mvnw
 
 # Pré-carrega as dependências utilizando o cache do BuildKit.
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \
-    ./mvnw -B -DskipTests dependency:go-offline
+    ./mvnw -B -Dmaven.test.skip=true dependency:go-offline
 
 # Copia o código-fonte somente depois das dependências.
 COPY src/ src/
 
 # Compila a aplicação e gera o JAR executável.
 RUN --mount=type=cache,target=/root/.m2,sharing=locked \
-    ./mvnw -B -DskipTests package \
+    ./mvnw -B -Dmaven.test.skip=true package \
     && cp target/*.jar /workspace/app.jar
 
 
