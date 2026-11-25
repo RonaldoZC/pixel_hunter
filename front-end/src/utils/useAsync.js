@@ -1,9 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
-// Executa `load` ao montar e a cada `reload()`, expondo { data, loading, error, reload }.
-// `load` deve ser estável (useCallback) para não disparar novas chamadas a cada render.
 export default function useAsync(load) {
-  const [state, setState] = useState({ data: null, loading: true, error: null });
+  const [state, setState] = useState({ data: undefined, loading: true, error: undefined });
   const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
@@ -11,10 +9,10 @@ export default function useAsync(load) {
 
     load()
       .then((data) => {
-        if (!cancelled) setState({ data, loading: false, error: null });
+        if (!cancelled) setState({ data, loading: false, error: undefined });
       })
       .catch((error) => {
-        if (!cancelled) setState({ data: null, loading: false, error });
+        if (!cancelled) setState({ data: undefined, loading: false, error });
       });
 
     return () => {
@@ -23,7 +21,7 @@ export default function useAsync(load) {
   }, [load, attempt]);
 
   const reload = useCallback(() => {
-    setState({ data: null, loading: true, error: null });
+    setState({ data: undefined, loading: true, error: undefined });
     setAttempt((count) => count + 1);
   }, []);
 

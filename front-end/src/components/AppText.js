@@ -2,7 +2,6 @@ import { Text } from 'react-native';
 
 import { colors, fontSizes, fonts } from '../constants/theme';
 
-// Texto padrão do app: aplica a fonte pixel art e a cor do tema.
 export default function AppText({ bold, size = 'md', color = colors.text, style, ...props }) {
   return (
     <Text

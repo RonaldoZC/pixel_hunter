@@ -1,7 +1,6 @@
 import { toAppId } from './apiIds';
-import { fetchAllPages } from './pagination';
+import { fetchAll } from './pagination';
 
-// Venda da API (item de pedido visto pelo vendedor) -> venda do app. O comprador não é exposto.
 function toSale(dto) {
   return {
     id: `${dto.orderId}-${dto.assetId}`,
@@ -13,7 +12,6 @@ function toSale(dto) {
   };
 }
 
-// Histórico de vendas do vendedor logado, da mais recente para a mais antiga.
 export async function getSales() {
-  return (await fetchAllPages('/ws/sales', { auth: true })).map(toSale);
+  return fetchAll('/ws/sales', toSale, { auth: true });
 }

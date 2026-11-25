@@ -3,7 +3,6 @@ import { StyleSheet, TextInput, View } from 'react-native';
 import { colors, fontSizes, fonts, spacing } from '../constants/theme';
 import IconButton from './IconButton';
 
-// Campo de pesquisa com lupa. `onSubmitEditing` dispara pelo teclado e pela lupa.
 export default function SearchBar({
   value,
   onChangeText,

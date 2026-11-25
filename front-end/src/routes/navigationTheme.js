@@ -2,7 +2,6 @@ import { DarkTheme } from '@react-navigation/native';
 
 import { colors, fonts } from '../constants/theme';
 
-// Tema do React Navigation alinhado aos tokens do app (cores e fonte pixel art).
 const navigationTheme = {
   ...DarkTheme,
   colors: {

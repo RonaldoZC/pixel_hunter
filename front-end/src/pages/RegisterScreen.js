@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import AppText from '../components/AppText';
@@ -9,32 +8,25 @@ import TextField from '../components/TextField';
 import { colors, spacing } from '../constants/theme';
 import { signUp } from '../services/authService';
 import useAction from '../utils/useAction';
+import useForm from '../utils/useForm';
 import { validateRegister } from '../utils/validators';
 
-const emptyForm = { username: '', email: '', password: '', confirmPassword: '', role: null };
+const emptyForm = { username: '', email: '', password: '', confirmPassword: '', role: undefined };
 const roleOptions = [
   { value: 'BUYER', label: 'Comprador' },
   { value: 'SELLER', label: 'Vendedor' },
 ];
 
 export default function RegisterScreen({ navigation }) {
-  const [form, setForm] = useState(emptyForm);
-  const [errors, setErrors] = useState({});
-  const register = useAction(signUp);
-
-  // Atualiza o campo e limpa o erro e o aviso dele, para não mostrar mensagem desatualizada.
-  const setField = (field) => (value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
-    register.clear();
-  };
-
-  const submit = async () => {
-    const found = validateRegister(form);
-    setErrors(found);
-    if (Object.keys(found).length > 0) return;
-    if (await register.run(form)) setForm(emptyForm);
-  };
+  const { form, errors, setField, reset, submit } = useForm({
+    initial: emptyForm,
+    validate: validateRegister,
+    onEdit: () => register.clear(),
+  });
+  const register = useAction(async (values) => {
+    await signUp(values);
+    reset();
+  });
 
   return (
     <Screen>
@@ -75,7 +67,7 @@ export default function RegisterScreen({ navigation }) {
           onChange={setField('role')}
           error={errors.role}
         />
-        <Button title="Cadastrar" onPress={submit} loading={register.loading} />
+        <Button title="Cadastrar" onPress={() => submit(register.run)} loading={register.loading} />
         {register.error ? (
           <AppText size="sm" color={colors.error}>
             {register.error}

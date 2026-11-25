@@ -4,7 +4,6 @@ import { colors, spacing } from '../constants/theme';
 import AppText from './AppText';
 import Screen from './Screen';
 
-// Tela provisória da etapa de esqueleto de navegação; será substituída pela tela real.
 export default function PlaceholderScreen({ title, children }) {
   return (
     <Screen style={styles.container}>

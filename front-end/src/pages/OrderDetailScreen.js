@@ -2,8 +2,8 @@ import { useCallback } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import AppText from '../components/AppText';
+import AsyncContent from '../components/AsyncContent';
 import Card from '../components/Card';
-import { ErrorState, LoadingState } from '../components/ListStates';
 import RequireAuth from '../components/RequireAuth';
 import Screen from '../components/Screen';
 import { orderStatusLabel } from '../constants/orders';
@@ -22,43 +22,32 @@ export default function OrderDetailScreen({ route }) {
 
 function OrderDetail({ id }) {
   const load = useCallback(() => getOrderById(id), [id]);
-  const { data: order, loading, error, reload } = useAsync(load);
-
-  if (loading) {
-    return (
-      <Screen>
-        <LoadingState />
-      </Screen>
-    );
-  }
-  if (error) {
-    return (
-      <Screen>
-        <ErrorState message={error.message} onRetry={reload} />
-      </Screen>
-    );
-  }
+  const orderState = useAsync(load);
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.content}>
-        <AppText bold size="xl">
-          Pedido {order.number}
-        </AppText>
-        <AppText color={colors.textMuted}>
-          {orderStatusLabel(order.status)} · {formatDateTime(order.createdAt)}
-        </AppText>
-        <Card>
-          {order.items.map((item) => (
-            <AppText key={item.assetId}>
-              {item.title} — {formatPrice(item.price)}
+      <AsyncContent state={orderState}>
+        {(order) => (
+          <ScrollView contentContainerStyle={styles.content}>
+            <AppText bold size="xl">
+              Pedido {order.number}
             </AppText>
-          ))}
-        </Card>
-        <AppText bold size="lg" color={colors.primary}>
-          Total: {formatPrice(order.total)}
-        </AppText>
-      </ScrollView>
+            <AppText color={colors.textMuted}>
+              {orderStatusLabel(order.status)} · {formatDateTime(order.createdAt)}
+            </AppText>
+            <Card>
+              {order.items.map((item) => (
+                <AppText key={item.assetId}>
+                  {item.title} — {formatPrice(item.price)}
+                </AppText>
+              ))}
+            </Card>
+            <AppText bold size="lg" color={colors.primary}>
+              Total: {formatPrice(order.total)}
+            </AppText>
+          </ScrollView>
+        )}
+      </AsyncContent>
     </Screen>
   );
 }

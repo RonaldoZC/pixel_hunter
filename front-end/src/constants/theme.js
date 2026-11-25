@@ -1,4 +1,3 @@
-// Tokens visuais do Pixel Hunter (tema escuro com verde neon, baseado nos frames de design).
 import {
   PixelifySans_400Regular,
   PixelifySans_700Bold,
@@ -18,10 +17,6 @@ export const colors = {
 
 export const spacing = { xs: 4, sm: 8, md: 16, lg: 24, xl: 32 };
 
-// Cantos sempre quadrados (estética pixel art): não há token de raio.
-
-// Efeitos de elevação dos elementos tocáveis: sombra dura deslocada (pixelada) + brilho neon.
-// Ao tocar, o elemento "afunda" (sombra menor e deslocamento de 2px).
 const shadowColor = '#1F6B00';
 const glow = '0px 0px 10px 0px rgba(108, 255, 0, 0.45)';
 
@@ -33,13 +28,11 @@ export const effects = {
   },
 };
 
-// Nomes de família usados nos estilos; devem coincidir com as chaves de `fontFiles`.
 export const fonts = {
   regular: 'PixelifySans_400Regular',
   bold: 'PixelifySans_700Bold',
 };
 
-// Mapa passado ao useFonts() em App.js.
 export const fontFiles = {
   PixelifySans_400Regular,
   PixelifySans_700Bold,

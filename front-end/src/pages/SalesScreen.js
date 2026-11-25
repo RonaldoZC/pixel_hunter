@@ -1,8 +1,8 @@
 import { FlatList, StyleSheet } from 'react-native';
 
 import AppText from '../components/AppText';
+import AsyncContent from '../components/AsyncContent';
 import Card from '../components/Card';
-import { EmptyState, ErrorState, LoadingState } from '../components/ListStates';
 import RequireAuth from '../components/RequireAuth';
 import Screen from '../components/Screen';
 import { colors, spacing } from '../constants/theme';
@@ -18,47 +18,43 @@ export default function SalesScreen() {
   );
 }
 
-// Histórico de vendas do vendedor logado, com o total vendido no topo.
 function SalesList() {
-  const { data, loading, error, reload } = useAsync(getSales);
+  const sales = useAsync(getSales);
 
-  let content;
-  if (loading) {
-    content = <LoadingState />;
-  } else if (error) {
-    content = <ErrorState message={error.message} onRetry={reload} />;
-  } else if (data.length === 0) {
-    content = <EmptyState message="Você ainda não vendeu nenhum produto." />;
-  } else {
-    const total = data.reduce((sum, sale) => sum + sale.price, 0);
-    content = (
-      <FlatList
-        data={data}
-        keyExtractor={(sale) => sale.id}
-        contentContainerStyle={styles.list}
-        ListHeaderComponent={
-          <AppText bold size="lg" color={colors.primary}>
-            Total vendido: {formatPrice(total)} ({data.length} {data.length === 1 ? 'venda' : 'vendas'})
-          </AppText>
-        }
-        renderItem={({ item }) => (
-          <Card>
-            <AppText bold numberOfLines={2}>
-              {item.title}
-            </AppText>
-            <AppText size="sm" color={colors.textMuted}>
-              Pedido {item.orderNumber} · {formatDateTime(item.soldAt)}
-            </AppText>
-            <AppText bold color={colors.primary}>
-              {formatPrice(item.price)}
-            </AppText>
-          </Card>
-        )}
-      />
-    );
-  }
-
-  return <Screen>{content}</Screen>;
+  return (
+    <Screen>
+      <AsyncContent state={sales} emptyMessage="Você ainda não vendeu nenhum produto.">
+        {(data) => {
+          const total = data.reduce((sum, sale) => sum + sale.price, 0);
+          return (
+            <FlatList
+              data={data}
+              keyExtractor={(sale) => sale.id}
+              contentContainerStyle={styles.list}
+              ListHeaderComponent={
+                <AppText bold size="lg" color={colors.primary}>
+                  Total vendido: {formatPrice(total)} ({data.length} {data.length === 1 ? 'venda' : 'vendas'})
+                </AppText>
+              }
+              renderItem={({ item }) => (
+                <Card>
+                  <AppText bold numberOfLines={2}>
+                    {item.title}
+                  </AppText>
+                  <AppText size="sm" color={colors.textMuted}>
+                    Pedido {item.orderNumber} · {formatDateTime(item.soldAt)}
+                  </AppText>
+                  <AppText bold color={colors.primary}>
+                    {formatPrice(item.price)}
+                  </AppText>
+                </Card>
+              )}
+            />
+          );
+        }}
+      </AsyncContent>
+    </Screen>
+  );
 }
 
 const styles = StyleSheet.create({

@@ -1,87 +1,80 @@
-// Validações de formulário feitas no app, só para avisar cedo. A API valida de novo e suas
-// mensagens de erro prevalecem.
-// Cada validador devolve um objeto { campo: mensagem }; vazio significa dados válidos.
-
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const URL_PATTERN = /^https?:\/\/[^\s.]+\.[^\s]+$/i;
 const MIN_PASSWORD_LENGTH = 6;
 
-// Converte texto digitado ("19,90" ou "19.90") em número; devolve NaN se inválido.
+export const ROLES = ['BUYER', 'SELLER'];
+
 export function parsePrice(text) {
   const normalized = String(text).trim().replace(',', '.');
   if (!/^\d+(\.\d{1,2})?$/.test(normalized)) return NaN;
   return Number(normalized);
 }
 
-export const ROLES = ['BUYER', 'SELLER'];
+function onlyErrors(messages) {
+  return Object.fromEntries(Object.entries(messages).filter(([, message]) => message));
+}
+
+const required = (value, message) => (value.trim() ? '' : message);
+
+function emailError(email) {
+  if (!email.trim()) return 'Informe o e-mail.';
+  return EMAIL_PATTERN.test(email.trim()) ? '' : 'E-mail inválido.';
+}
+
+function newPasswordError(password) {
+  if (!password) return 'Informe a senha.';
+  return password.length < MIN_PASSWORD_LENGTH
+    ? `A senha deve ter ao menos ${MIN_PASSWORD_LENGTH} caracteres.`
+    : '';
+}
+
+function confirmPasswordError(confirmPassword, password) {
+  if (!confirmPassword) return 'Confirme a senha.';
+  return confirmPassword === password ? '' : 'As senhas não coincidem.';
+}
+
+function priceError(price) {
+  if (!price.trim()) return 'Informe o preço.';
+  const value = parsePrice(price);
+  return Number.isNaN(value) || value <= 0 ? 'Preço inválido. Use um valor como 19,90.' : '';
+}
+
+function linkError(link) {
+  if (!link.trim()) return '';
+  return URL_PATTERN.test(link.trim()) ? '' : 'Link inválido. Use um endereço como https://meusite.com.';
+}
 
 export function validateLogin({ email, password }) {
-  const errors = {};
-  if (!email.trim()) errors.email = 'Informe o e-mail.';
-  if (!password) errors.password = 'Informe a senha.';
-  return errors;
+  return onlyErrors({
+    email: required(email, 'Informe o e-mail.'),
+    password: password ? '' : 'Informe a senha.',
+  });
 }
 
 export function validateRegister({ username, email, password, confirmPassword, role }) {
-  const errors = {};
-
-  if (!username.trim()) errors.username = 'Informe o nome de usuário.';
-  if (!ROLES.includes(role)) errors.role = 'Escolha o tipo de conta.';
-
-  if (!email.trim()) {
-    errors.email = 'Informe o e-mail.';
-  } else if (!EMAIL_PATTERN.test(email.trim())) {
-    errors.email = 'E-mail inválido.';
-  }
-
-  if (!password) {
-    errors.password = 'Informe a senha.';
-  } else if (password.length < MIN_PASSWORD_LENGTH) {
-    errors.password = `A senha deve ter ao menos ${MIN_PASSWORD_LENGTH} caracteres.`;
-  }
-
-  if (!confirmPassword) {
-    errors.confirmPassword = 'Confirme a senha.';
-  } else if (confirmPassword !== password) {
-    errors.confirmPassword = 'As senhas não coincidem.';
-  }
-
-  return errors;
+  return onlyErrors({
+    username: required(username, 'Informe o nome de usuário.'),
+    role: ROLES.includes(role) ? '' : 'Escolha o tipo de conta.',
+    email: emailError(email),
+    password: newPasswordError(password),
+    confirmPassword: confirmPasswordError(confirmPassword, password),
+  });
 }
 
 export function validateProduct({ title, description, price, image, categoryId }) {
-  const errors = {};
-
-  if (!categoryId) errors.categoryId = 'Escolha a categoria.';
-  if (!title.trim()) errors.title = 'Informe o título.';
-  if (!image) errors.image = 'Escolha a imagem do produto.';
-  if (!description.trim()) errors.description = 'Informe a descrição.';
-
-  if (!price.trim()) {
-    errors.price = 'Informe o preço.';
-  } else if (Number.isNaN(parsePrice(price)) || parsePrice(price) <= 0) {
-    errors.price = 'Preço inválido. Use um valor como 19,90.';
-  }
-
-  return errors;
+  return onlyErrors({
+    categoryId: categoryId ? '' : 'Escolha a categoria.',
+    title: required(title, 'Informe o título.'),
+    image: image ? '' : 'Escolha a imagem do produto.',
+    description: required(description, 'Informe a descrição.'),
+    price: priceError(price),
+  });
 }
 
-const URL_PATTERN = /^https?:\/\/[^\s.]+\.[^\s]+$/i;
-
-// O link é opcional; quando preenchido, deve começar com http:// ou https://.
 export function validateProfile({ username, email, link }) {
-  const errors = {};
-
-  if (!username.trim()) errors.username = 'Informe o nome de usuário.';
-
-  if (!email.trim()) {
-    errors.email = 'Informe o e-mail.';
-  } else if (!EMAIL_PATTERN.test(email.trim())) {
-    errors.email = 'E-mail inválido.';
-  }
-
-  if (link.trim() && !URL_PATTERN.test(link.trim())) {
-    errors.link = 'Link inválido. Use um endereço como https://meusite.com.';
-  }
-
-  return errors;
+  return onlyErrors({
+    username: required(username, 'Informe o nome de usuário.'),
+    email: emailError(email),
+    link: linkError(link),
+  });
 }

@@ -1,25 +1,23 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 
 import { signIn as signInRequest } from '../services/authService';
-import { clearSession, loadSession, saveSession } from '../services/authStorage';
+import { clearSession, loadSession, saveSession, SIGNED_OUT } from '../services/authStorage';
 import { configureHttpClient } from '../services/httpClient';
 
-// Sessão do usuário: { user, token }. O token fica no armazenamento seguro e é lido ao abrir o app.
-// O cliente HTTP recebe daqui o token e o aviso de sessão expirada (401 em rota logada).
-const AuthContext = createContext(null);
+const AuthContext = createContext(undefined);
 
 export function AuthProvider({ children }) {
-  const [session, setSession] = useState(null);
+  const [session, setSession] = useState(SIGNED_OUT);
   const [restoring, setRestoring] = useState(true);
-  const tokenRef = useRef(null);
+  const tokenRef = useRef(SIGNED_OUT.token);
 
   const applySession = useCallback((next) => {
-    tokenRef.current = next?.token ?? null;
+    tokenRef.current = next.token;
     setSession(next);
   }, []);
 
   const signOut = useCallback(async () => {
-    applySession(null);
+    applySession(SIGNED_OUT);
     await clearSession();
   }, [applySession]);
 
@@ -40,7 +38,6 @@ export function AuthProvider({ children }) {
     [applySession]
   );
 
-  // Atualiza o usuário guardado depois de editar o perfil.
   const updateUser = useCallback(
     (user) => {
       const next = { ...session, user };
@@ -51,7 +48,7 @@ export function AuthProvider({ children }) {
   );
 
   const value = useMemo(() => {
-    const user = session?.user ?? null;
+    const { user } = session;
     return {
       user,
       restoring,

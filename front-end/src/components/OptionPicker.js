@@ -3,8 +3,6 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import { colors, spacing } from '../constants/theme';
 import AppText from './AppText';
 
-// Escolha de uma opção entre poucas, em botões lado a lado (quebra de linha se faltar espaço).
-// `options` é uma lista de { value, label }; `onChange` recebe o `value` escolhido.
 export default function OptionPicker({ label, options, value, onChange, error }) {
   return (
     <View style={styles.wrapper}>

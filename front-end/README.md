@@ -53,7 +53,7 @@ docs/api-contract.md  endpoints da API usados pelo app
 
 | Tela | Estado |
 |---|---|
-| Início (Home) | Login real (e-mail e senha), com carregamento e erro; a sessão fica no armazenamento seguro e é restaurada ao abrir. "Explorar lojas" entra sem conta. |
+| Início (Home) | Login real (e-mail e senha), com carregamento e erro; a sessão fica no armazenamento seguro e é restaurada ao abrir. |
 | Cadastro | Usuário, e-mail, senha e tipo de conta (Comprador ou Vendedor); envia à API. |
 | Mapa de Lojas (menu principal) | Busca, configurações, carrinho com contador e categorias vindas da API sobre o mapa. |
 | Lista de assets (categoria/busca) | Produtos da API, com imagem; busca e filtro feitos pelo servidor. Trata carregamento, erro e lista vazia. |

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Image, ScrollView, StyleSheet } from 'react-native';
 
 import AppText from '../components/AppText';
@@ -9,34 +9,24 @@ import { logo } from '../constants/images';
 import { colors, spacing } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import useAction from '../utils/useAction';
+import useForm from '../utils/useForm';
 import { validateLogin } from '../utils/validators';
 
 export default function HomeScreen({ navigation }) {
   const { user, restoring, signIn } = useAuth();
-  const [form, setForm] = useState({ email: '', password: '' });
-  const [errors, setErrors] = useState({});
+  const { form, errors, setField, submit } = useForm({
+    initial: { email: '', password: '' },
+    validate: validateLogin,
+    onEdit: () => login.clear(),
+  });
   const login = useAction(signIn);
   const redirected = useRef(false);
 
-  // Com sessão (recém-feita ou restaurada ao abrir o app), segue para o mapa uma única vez.
-  // Voltar ao início pelo mapa não redireciona de novo; sair da conta recria esta tela.
   useEffect(() => {
     if (restoring || !user || redirected.current) return;
     redirected.current = true;
     navigation.navigate('StoreMap');
   }, [restoring, user, navigation]);
-
-  const setField = (field) => (value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
-    login.clear();
-  };
-
-  const submit = () => {
-    const found = validateLogin(form);
-    setErrors(found);
-    if (Object.keys(found).length === 0) login.run(form);
-  };
 
   return (
     <Screen>
@@ -60,15 +50,13 @@ export default function HomeScreen({ navigation }) {
           error={errors.password}
           secureTextEntry
         />
-        <Button title="Entrar" onPress={submit} loading={login.loading || restoring} />
+        <Button title="Entrar" onPress={() => submit(login.run)} loading={login.loading || restoring} />
         {login.error ? (
           <AppText size="sm" color={colors.error}>
             {login.error}
           </AppText>
         ) : null}
         <Button title="Cadastrar" variant="outline" size="sm" onPress={() => navigation.navigate('Register')} />
-        {/* Navegar pelas lojas não exige conta; comprar e vender exigem. */}
-        <Button title="Explorar lojas" variant="outline" size="sm" onPress={() => navigation.navigate('StoreMap')} />
       </ScrollView>
     </Screen>
   );

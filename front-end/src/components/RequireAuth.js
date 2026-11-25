@@ -2,8 +2,6 @@ import { EmptyState, LoadingState } from './ListStates';
 import Screen from './Screen';
 import { useAuth } from '../context/AuthContext';
 
-// Mostra `children` só para quem está logado (e, se `role` for dado, tem esse perfil).
-// Os botões das Configurações já escondem essas telas; isto protege também o acesso direto.
 export default function RequireAuth({ role, message, children }) {
   const { user, restoring } = useAuth();
 

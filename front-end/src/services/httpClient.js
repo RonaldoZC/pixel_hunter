@@ -1,17 +1,7 @@
-// Único ponto de acesso HTTP do app: monta a URL, envia o token, aplica timeout e converte
-// qualquer falha em ApiError com mensagem pronta para o usuário.
 import { getApiUrl, REQUEST_TIMEOUT_MS } from '../config/env';
+import { ApiError, ConfigError } from '../errors';
 
-export class ApiError extends Error {
-  constructor(message, status = 0) {
-    super(message);
-    this.name = 'ApiError';
-    this.status = status;
-  }
-}
-
-// O AuthContext registra aqui como obter o token e o que fazer quando a sessão expira.
-let getToken = () => null;
+let getToken = () => '';
 let onUnauthorized = () => {};
 
 export function configureHttpClient(options) {
@@ -28,10 +18,9 @@ function buildUrl(path, query) {
   return `${getApiUrl()}${path}${queryString ? `?${queryString}` : ''}`;
 }
 
-// Lê o corpo como JSON quando possível; o back-end às vezes responde texto puro.
 async function readBody(response) {
   const text = await response.text();
-  if (!text) return null;
+  if (!text) return undefined;
   try {
     return JSON.parse(text);
   } catch {
@@ -49,16 +38,25 @@ function errorMessage(status, body, authenticated) {
   return 'Não foi possível concluir a operação.';
 }
 
-// Opções: method, query (objeto), body (JSON), formData (multipart), auth (envia o token) e
-// timeoutMs. Em multipart não definimos Content-Type: o fetch coloca o boundary sozinho.
-export async function request(path, { method = 'GET', query, body, formData, auth = false, timeoutMs = REQUEST_TIMEOUT_MS } = {}) {
+function buildHeaders({ auth, hasJsonBody }) {
   const headers = { Accept: 'application/json' };
-  if (auth) {
-    const token = getToken();
-    if (token) headers.Authorization = `Bearer ${token}`;
-  }
-  if (body !== undefined) headers['Content-Type'] = 'application/json';
+  const token = auth ? getToken() : '';
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (hasJsonBody) headers['Content-Type'] = 'application/json';
+  return headers;
+}
 
+function toNetworkError(error) {
+  if (error instanceof ApiError || error instanceof ConfigError) return error;
+  const message =
+    error.name === 'AbortError'
+      ? 'O servidor demorou demais para responder. Tente de novo.'
+      : 'Não foi possível conectar ao servidor. Verifique sua conexão e a URL da API.';
+  return new ApiError(message, 0, error);
+}
+
+export async function request(path, { method = 'GET', query, body, formData, auth = false, timeoutMs = REQUEST_TIMEOUT_MS } = {}) {
+  const hasJsonBody = body !== undefined;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
 
@@ -66,17 +64,12 @@ export async function request(path, { method = 'GET', query, body, formData, aut
   try {
     response = await fetch(buildUrl(path, query), {
       method,
-      headers,
-      body: formData ?? (body !== undefined ? JSON.stringify(body) : undefined),
+      headers: buildHeaders({ auth, hasJsonBody }),
+      body: formData ?? (hasJsonBody ? JSON.stringify(body) : undefined),
       signal: controller.signal,
     });
   } catch (error) {
-    if (error instanceof ApiError || error.message?.startsWith('URL da API')) throw error;
-    throw new ApiError(
-      error.name === 'AbortError'
-        ? 'O servidor demorou demais para responder. Tente de novo.'
-        : 'Não foi possível conectar ao servidor. Verifique sua conexão e a URL da API.'
-    );
+    throw toNetworkError(error);
   } finally {
     clearTimeout(timer);
   }

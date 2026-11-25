@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 
 import AppText from '../components/AppText';
+import AsyncContent from '../components/AsyncContent';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import ImageField from '../components/ImageField';
-import { ErrorState, LoadingState } from '../components/ListStates';
 import RequireAuth from '../components/RequireAuth';
 import Screen from '../components/Screen';
 import TextField from '../components/TextField';
@@ -15,6 +15,7 @@ import { uploadImage } from '../services/mediaService';
 import { getMe, updateMe, updatePhoto } from '../services/userService';
 import useAction from '../utils/useAction';
 import useAsync from '../utils/useAsync';
+import useForm from '../utils/useForm';
 import { validateProfile } from '../utils/validators';
 
 export default function MyDataScreen() {
@@ -25,52 +26,33 @@ export default function MyDataScreen() {
   );
 }
 
-// Carrega o perfil do servidor e só mostra o formulário quando ele chegar.
 function MyData() {
-  const load = useCallback(() => getMe(), []);
-  const { data: profile, loading, error, reload } = useAsync(load);
+  const profile = useAsync(getMe);
 
   return (
     <Screen>
-      {loading ? <LoadingState /> : null}
-      {error ? <ErrorState message={error.message} onRetry={reload} /> : null}
-      {profile ? <ProfileForm profile={profile} /> : null}
+      <AsyncContent state={profile}>{(data) => <ProfileForm profile={data} />}</AsyncContent>
     </Screen>
   );
 }
 
 function ProfileForm({ profile }) {
   const { updateUser } = useAuth();
-  const [form, setForm] = useState({
-    username: profile.username,
-    email: profile.email,
-    link: profile.link,
+  const { form, errors, setField, submit } = useForm({
+    initial: { username: profile.username, email: profile.email, link: profile.link },
+    validate: validateProfile,
+    onEdit: () => save.clear(),
   });
   const [photoUrl, setPhotoUrl] = useState(profile.photoUrl);
-  const [errors, setErrors] = useState({});
 
-  const save = useAction(async () => {
-    updateUser(await updateMe(form));
+  const save = useAction(async (values) => {
+    updateUser(await updateMe(values));
   });
-  // Escolher a foto já a envia: sobe a imagem e grava a URL no perfil.
   const changePhoto = useAction(async (image) => {
     const user = await updatePhoto(await uploadImage(image));
     setPhotoUrl(user.photoUrl);
     updateUser(user);
   });
-
-  // Atualiza o campo e limpa o erro e o aviso dele, para não mostrar mensagem desatualizada.
-  const setField = (field) => (value) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
-    setErrors((prev) => ({ ...prev, [field]: undefined }));
-    save.clear();
-  };
-
-  const submit = () => {
-    const found = validateProfile(form);
-    setErrors(found);
-    if (Object.keys(found).length === 0) save.run();
-  };
 
   return (
     <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -82,7 +64,7 @@ function ProfileForm({ profile }) {
           icon="camera-outline"
           pickTitle="Editar foto"
           changeTitle="Editar foto"
-          value={photoUrl ? { uri: photoUrl } : null}
+          value={photoUrl ? { uri: photoUrl } : undefined}
           onChange={(image) => image && changePhoto.run(image)}
           error={changePhoto.error}
         />
@@ -114,7 +96,7 @@ function ProfileForm({ profile }) {
           onChangeText={setField('link')}
           error={errors.link}
         />
-        <Button title="Salvar" onPress={submit} loading={save.loading} />
+        <Button title="Salvar" onPress={() => submit(save.run)} loading={save.loading} />
         {save.error ? (
           <AppText size="sm" color={colors.error}>
             {save.error}

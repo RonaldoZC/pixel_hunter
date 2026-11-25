@@ -1,10 +1,10 @@
-// Guarda a sessão (token e usuário). No celular usa o armazenamento seguro do sistema;
-// no web (onde ele não existe) mantém só em memória, e a sessão termina ao recarregar.
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
 const KEY = 'pixelhunter.session';
-let memory = null;
+let memory;
+
+export const SIGNED_OUT = Object.freeze({ token: '', user: undefined });
 
 export async function saveSession(session) {
   const text = JSON.stringify(session);
@@ -15,23 +15,23 @@ export async function saveSession(session) {
   await SecureStore.setItemAsync(KEY, text);
 }
 
-// Devolve { token, user } ou null; qualquer problema de leitura vira "sem sessão".
 export async function loadSession() {
   try {
     const text = Platform.OS === 'web' ? memory : await SecureStore.getItemAsync(KEY);
-    const session = text ? JSON.parse(text) : null;
-    return session?.token && session?.user ? session : null;
-  } catch {
-    return null;
+    const session = text ? JSON.parse(text) : SIGNED_OUT;
+    return session.token && session.user ? session : SIGNED_OUT;
+  } catch (error) {
+    console.warn('Não foi possível ler a sessão salva; seguindo sem login.', error);
+    return SIGNED_OUT;
   }
 }
 
 export async function clearSession() {
-  memory = null;
+  memory = undefined;
   if (Platform.OS === 'web') return;
   try {
     await SecureStore.deleteItemAsync(KEY);
-  } catch {
-    // Sem o que apagar: a sessão já está limpa.
+  } catch (error) {
+    console.warn('Não foi possível apagar a sessão salva.', error);
   }
 }

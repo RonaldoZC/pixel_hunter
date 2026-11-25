@@ -12,7 +12,6 @@ export function LoadingState() {
   );
 }
 
-// Exibe a mensagem de erro real e, se `onRetry` existir, um botão para tentar de novo.
 export function ErrorState({ message, onRetry }) {
   return (
     <View style={styles.center}>

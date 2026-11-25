@@ -7,11 +7,6 @@ import { colors, spacing } from '../constants/theme';
 import AppText from './AppText';
 import Button from './Button';
 
-// Campo para escolher uma imagem da galeria, com prévia. `value` é a imagem escolhida
-// ({ uri, ... }) ou null; `onChange` recebe a nova imagem, ou null ao removê-la.
-// A imagem só é escolhida aqui: o envio ao servidor é feito por services/mediaService.js.
-// `square` abre o recorte quadrado (foto de perfil); `removable` esconde o botão Remover; `size`, `icon` e os títulos dos botões
-// adaptam o campo a cada uso.
 export default function ImageField({
   label,
   value,
@@ -24,10 +19,10 @@ export default function ImageField({
   changeTitle = 'Trocar imagem',
   removable = true,
 }) {
-  const [pickError, setPickError] = useState(null);
+  const [pickError, setPickError] = useState();
 
   const pick = async () => {
-    setPickError(null);
+    setPickError(undefined);
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ['images'],
@@ -59,7 +54,7 @@ export default function ImageField({
       <View style={styles.actions}>
         <Button title={value ? changeTitle : pickTitle} variant="outline" size="sm" onPress={pick} />
         {value && removable ? (
-          <Button title="Remover" variant="outline" size="sm" onPress={() => onChange(null)} />
+          <Button title="Remover" variant="outline" size="sm" onPress={() => onChange(undefined)} />
         ) : null}
       </View>
       {message ? (

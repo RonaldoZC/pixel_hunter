@@ -1,7 +1,3 @@
-// Posição dos rótulos de categoria no Mapa de Lojas, conforme o frame de design.
-// Os nomes e ids reais vêm da API (src/services/categoryService.js); aqui fica só o que é visual.
-// `x` e `y` são o CENTRO do rótulo sobre a imagem do mapa, de 0 a 1 em relação à imagem
-// inteira (0,0 = canto superior esquerdo). Ajustar aqui para mover um rótulo no mapa.
 export const categoryLayout = [
   { id: 'criaturas', name: 'Criaturas', x: 0.086, y: 0.093 },
   { id: 'decoracoes', name: 'Decorações', x: 0.386, y: 0.073 },

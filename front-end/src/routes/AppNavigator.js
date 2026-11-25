@@ -17,7 +17,6 @@ import SupportScreen from '../pages/SupportScreen';
 
 const Stack = createNativeStackNavigator();
 
-// Fluxo conforme os frames de design: Início -> Cadastro / Config / Mapa de Lojas.
 export default function AppNavigator() {
   return (
     <Stack.Navigator initialRouteName="Home">

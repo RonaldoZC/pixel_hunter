@@ -3,7 +3,6 @@ import { StyleSheet, TextInput, View } from 'react-native';
 import { colors, fontSizes, fonts, spacing } from '../constants/theme';
 import AppText from './AppText';
 
-// Campo de texto com rótulo e mensagem de erro de validação.
 export default function TextField({ label, error, multiline, style, ...props }) {
   return (
     <View style={styles.wrapper}>

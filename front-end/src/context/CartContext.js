@@ -1,8 +1,6 @@
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-// Carrinho local (em memória, não persistido). Assets são digitais: no máximo uma unidade de cada.
-// Guarda uma cópia mínima do asset; a compra é feita em orderService.createOrder.
-const CartContext = createContext(null);
+const CartContext = createContext(undefined);
 
 export function CartProvider({ children }) {
   const [items, setItems] = useState([]);
@@ -22,7 +20,6 @@ export function CartProvider({ children }) {
   const clear = useCallback(() => setItems([]), []);
 
   const value = useMemo(() => {
-    // Soma em centavos para evitar erros de ponto flutuante.
     const totalCents = items.reduce((sum, item) => sum + Math.round(item.price * 100), 0);
     return {
       items,

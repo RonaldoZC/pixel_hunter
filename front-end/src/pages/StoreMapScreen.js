@@ -15,15 +15,12 @@ import { getCategories } from '../services/categoryService';
 import { coverPoint } from '../utils/imageLayout';
 import useAsync from '../utils/useAsync';
 
-// Área reservada a cada rótulo; o rótulo fica centralizado nela, no ponto do mapa.
 const SLOT = { width: 160, height: 44 };
 
-// Menu principal: busca, configurações, carrinho e categorias sobre o mapa.
 export default function StoreMapScreen({ navigation }) {
   const [query, setQuery] = useState('');
-  const [mapSize, setMapSize] = useState(null);
+  const [mapSize, setMapSize] = useState();
   const { count } = useCart();
-  // As categorias vêm da API; sem elas o mapa não tem o que mostrar, então há botão de tentar de novo.
   const { data: categories, loading, error, reload } = useAsync(getCategories);
   const insets = useSafeAreaInsets();
 
@@ -61,14 +58,11 @@ export default function StoreMapScreen({ navigation }) {
         style={styles.map}
         onLayout={({ nativeEvent }) => setMapSize(nativeEvent.layout)}
       >
-        {/* O mapa começa abaixo da barra de busca, sem sobreposição; desfocado e escurecido
-            para manter os rótulos legíveis. */}
         <BackgroundImage
           source={mapBackground}
           imageSize={mapBackgroundSize}
           dim={0.35}
         />
-        {/* Rótulos ancorados ao desenho do mapa: acompanham o corte do "cover" em qualquer tela. */}
         {mapSize && categories
           ? categories
               .filter((category) => category.x !== undefined)

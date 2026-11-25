@@ -1,9 +1,8 @@
-// Acesso aos assets (produtos da API). Converte o formato da API para o que as telas usam.
+import { ApiError } from '../errors';
 import { toAppId } from './apiIds';
-import { ApiError, request } from './httpClient';
-import { fetchAllPages } from './pagination';
+import { request } from './httpClient';
+import { fetchAll } from './pagination';
 
-// Produto da API -> asset do app. `image` já no formato de fonte do React Native.
 export function toAsset(dto) {
   return {
     id: toAppId(dto.id),
@@ -11,16 +10,12 @@ export function toAsset(dto) {
     categoryId: toAppId(dto.categoryId),
     price: Number(dto.price),
     description: dto.description ?? '',
-    image: dto.imageUrl ? { uri: dto.imageUrl } : null,
+    image: dto.imageUrl ? { uri: dto.imageUrl } : undefined,
   };
 }
 
-// Filtro por categoria e texto é feito pelo servidor (a busca ignora acentos e maiúsculas).
 export async function getAssets({ categoryId, query } = {}) {
-  const products = await fetchAllPages('/products', {
-    query: { categoryId, query: query?.trim() },
-  });
-  return products.map(toAsset);
+  return fetchAll('/products', toAsset, { query: { categoryId, query: query?.trim() } });
 }
 
 export async function getAssetById(id) {
@@ -28,7 +23,7 @@ export async function getAssetById(id) {
     return toAsset(await request(`/products/${encodeURIComponent(id)}`));
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) {
-      throw new Error('Asset não encontrado.');
+      throw new ApiError('Asset não encontrado.', 404, error);
     }
     throw error;
   }

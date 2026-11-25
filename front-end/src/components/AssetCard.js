@@ -4,7 +4,6 @@ import { colors, effects, spacing } from '../constants/theme';
 import { formatPrice } from '../utils/format';
 import AppText from './AppText';
 
-// Card de asset. `image` é uma fonte de imagem do React Native (require ou { uri }).
 export default function AssetCard({ title, price, image, onPress }) {
   return (
     <Pressable

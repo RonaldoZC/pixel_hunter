@@ -1,8 +1,7 @@
 import { toApiId, toAppId } from './apiIds';
 import { request } from './httpClient';
-import { fetchAllPages } from './pagination';
+import { fetchAll } from './pagination';
 
-// Pedido da API -> pedido do app.
 function toOrder(dto) {
   return {
     id: toAppId(dto.id),
@@ -18,7 +17,6 @@ function toOrder(dto) {
   };
 }
 
-// Cria o pedido a partir dos itens do carrinho ({ id }). O preço é o do servidor.
 export async function createOrder(items) {
   const order = await request('/ws/orders', {
     method: 'POST',
@@ -29,10 +27,9 @@ export async function createOrder(items) {
 }
 
 export async function getOrders() {
-  return (await fetchAllPages('/ws/orders', { auth: true })).map(toOrder);
+  return fetchAll('/ws/orders', toOrder, { auth: true });
 }
 
-// Pedido do usuário logado, com os itens. A API responde 404 se não existir e 403 se for de outro usuário.
 export async function getOrderById(id) {
   return toOrder(await request(`/ws/orders/${encodeURIComponent(id)}`, { auth: true }));
 }

@@ -3,8 +3,6 @@ import { ActivityIndicator, Pressable, StyleSheet } from 'react-native';
 import { colors, effects, spacing } from '../constants/theme';
 import AppText from './AppText';
 
-// variant: 'primary' (preenchido em verde, ação principal da tela) ou 'outline' (secundário).
-// size: 'md' ou 'sm' (ações secundárias).
 export default function Button({ title, onPress, variant = 'primary', size = 'md', disabled, loading, style }) {
   const isPrimary = variant === 'primary';
   const inactive = disabled || loading;

@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
 
 import { UPLOAD_TIMEOUT_MS } from '../config/env';
+import { ValidationError } from '../errors';
 import { request } from './httpClient';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
@@ -13,7 +14,6 @@ function typeOf(image) {
   return EXTENSION_TYPES[extension] ?? 'image/jpeg';
 }
 
-// O FormData do React Native aceita { uri, name, type }; no web precisa de um Blob.
 async function buildFormData(image, type) {
   const formData = new FormData();
   if (Platform.OS === 'web') {
@@ -26,14 +26,13 @@ async function buildFormData(image, type) {
   return formData;
 }
 
-// Envia a imagem escolhida na galeria (resultado do ImageField) e devolve a URL pública.
 export async function uploadImage(image) {
   const type = typeOf(image);
   if (!ALLOWED_TYPES.includes(type)) {
-    throw new Error('Formato de imagem não aceito. Use PNG, JPG ou WebP.');
+    throw new ValidationError('Formato de imagem não aceito. Use PNG, JPG ou WebP.');
   }
   if (image.fileSize && image.fileSize > MAX_BYTES) {
-    throw new Error('A imagem é grande demais. O máximo é 5 MB.');
+    throw new ValidationError('A imagem é grande demais. O máximo é 5 MB.');
   }
 
   const result = await request('/ws/media', {

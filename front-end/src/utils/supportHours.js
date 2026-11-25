@@ -1,5 +1,3 @@
-// Horário de atendimento em Brasília (UTC-3), por dia da semana (0 = domingo): [abre, fecha) em horas.
-// Feriados nacionais não são considerados.
 const BRASILIA_OFFSET_MS = -3 * 60 * 60 * 1000;
 const SCHEDULE = {
   0: null,

@@ -1,6 +1,3 @@
-// Dados do atendimento ao cliente, conforme o frame de design.
-// Provisório: confirmar com o grupo. `email` ainda não foi informado; enquanto for null,
-// o botão "Enviar e-mail" fica desabilitado.
 export const supportInfo = {
   phones: ['(54)92351-1651', '(54)55555-5555'],
   email: null,
